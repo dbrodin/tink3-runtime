@@ -1,0 +1,26 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: cluster-1
+  region: eu-west-1
+  version: "1.20"
+
+managedNodeGroups:
+- name: primary
+  instanceType: t2.small
+  privateNetworking: true
+  minSize: 3
+  maxSize: 6
+  spot: true
+
+# Run pods in default and kube-system in fargate
+fargateProfiles:
+ - name: fp-default
+   selectors:
+     - namespace: default
+     - namespace: kube-system
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: [all]

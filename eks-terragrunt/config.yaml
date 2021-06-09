@@ -28,7 +28,11 @@ eks-cluster:
   tags:
     Name: "infra-testing-cluster-1"
     Maintainer: "infrastructure"
-  map_roles: []
+  map_roles:
+  - rolearn: "arn:aws:iam::649414960431:role/TinkAccessDeveloper"
+    username: TinkAccessDeveloper
+    groups:
+    - "system:masters"
 
 # K8s namespaces
 k8s-namespaces:

@@ -61,9 +61,9 @@ module "eks_cluster" {
     "spot" = {
       create_launch_template = true
       desired_capacity       = 1
-      max_capacity           = 1
+      max_capacity           = 3
       min_capacity           = 1
-      instance_types         = ["t3.micro"]
+      instance_types         = ["t3.small"]
       disk_size              = 16
       k8s_labels = {
         pool = "spot-instances"
@@ -75,7 +75,7 @@ module "eks_cluster" {
 
 # Add addons to the cluster
 resource "aws_eks_addon" "cni" {
-  cluster_name      = local.cluster_name
+  cluster_name      = module.eks_cluster.cluster_id
   resolve_conflicts = "OVERWRITE"
   addon_name        = "vpc-cni"
   addon_version     = "v1.7.10-eksbuild.1"
@@ -83,7 +83,7 @@ resource "aws_eks_addon" "cni" {
 }
 
 resource "aws_eks_addon" "dns" {
-  cluster_name      = local.cluster_name
+  cluster_name      = module.eks_cluster.cluster_id
   resolve_conflicts = "OVERWRITE"
   addon_name        = "coredns"
   addon_version     = "v1.8.3-eksbuild.1"

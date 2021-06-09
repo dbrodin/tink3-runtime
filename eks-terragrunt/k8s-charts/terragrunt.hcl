@@ -94,6 +94,7 @@ inputs = {
       chart_repo    = "https://kubernetes.github.io/ingress-nginx"
       chart_version = "3.33.0"
       namespace     = "ingress-nginx"
+      deploy_config = {}
     }
   }
 }

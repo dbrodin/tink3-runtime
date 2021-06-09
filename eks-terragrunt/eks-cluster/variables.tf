@@ -3,7 +3,13 @@ variable "cluster_config" {
     cluster_name    = string
     cluster_version = string
     tags            = map(string)
-    map_roles       = list(map(string))
+    map_roles = list(object(
+      {
+        rolearn  = string
+        username = string
+        groups   = list(string)
+      }
+    ))
   })
   description = "Cluster config - config.yaml inputs"
 }

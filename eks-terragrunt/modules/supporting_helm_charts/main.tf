@@ -14,15 +14,15 @@ resource "helm_release" "main" {
   version    = lookup(each.value, "chart_version", null)
 
   # Deploy config
-  force_update    = lookup(each.value, "force_helm_update", false)
-  recreate_pods   = lookup(each.value, "recreate_pods_during_update", false)
-  wait            = lookup(each.value, "wait_for_rollout", true)
-  cleanup_on_fail = lookup(each.value, "cleanup_on_fail", false)
+  force_update    = try(each.value["deploy_config"]["force_helm_update"], false)
+  recreate_pods   = try(each.value["deploy_config"]["recreate_pods_during_update"], false)
+  wait            = try(each.value["deploy_config"]["wait_for_rollout"], true)
+  cleanup_on_fail = try(each.value["deploy_config"]["cleanup_on_fail"], false)
 
-  skip_crds = lookup(each.value, "skip_crds", false)
-  verify    = lookup(each.value, "verify", false)
+  skip_crds = try(each.value["deploy_config"]["skip_crds"], false)
+  verify    = try(each.value["deploy_config"]["verify"], false)
 
-  values = lookup(each.value, "values", [])
+  values = try(each.value["deploy_config"]["values"], [])
 }
 
 # TODO: This could be checked and fixed with the ingress/egress etc

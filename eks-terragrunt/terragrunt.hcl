@@ -1,7 +1,7 @@
 ## Define remote state and config files
 
 terragrunt_version_constraint = ">= 0.23"
-terraform_version_constraint  = ">= 0.14.4"
+terraform_version_constraint  = "= 0.14.4"
 
 locals {
   config_file = yamldecode(file("config.yaml"))

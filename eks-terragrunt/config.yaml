@@ -1,0 +1,40 @@
+region: "eu-west-1"
+
+# Remote state config
+tf-state:
+  tf_remote_state_bucket: "tink3-sandbox-infra-testing-tf-state"
+  tf_remote_dynamodb_lock: "tink3-sandbox-infra-testing-tf-state-lock"
+
+# VPC
+vpc-config:
+  name: "vpc-eks-infra-testing"
+  cidr: "10.1.0.0/16"
+  private_subnets:
+  - "10.1.1.0/24"
+  - "10.1.2.0/24"
+  - "10.1.3.0/24"
+  public_subnets:
+  - "10.1.101.0/24"
+  - "10.1.102.0/24"
+  - "10.1.103.0/24"
+  tags:
+    Name: "vpc-eks-infra-testing"
+    Maintainer: "infrastructure"
+
+# EKS config
+eks-cluster:
+  cluster_name: "infra-testing-cluster-1"
+  cluster_version: "1.20"
+  tags:
+    Name: "infra-testing-cluster-1"
+    Maintainer: "infrastructure"
+  map_roles: []
+
+# K8s namespaces
+k8s-namespaces:
+  ingress-nginx:
+    labels:
+      service: ingress-nginx
+      maintainer: infrastructure
+
+# Charts to deploy - Currently set in the k8s-charts inputs = {}

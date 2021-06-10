@@ -23,3 +23,18 @@ variable "kubernetes_network_policy" {
   default     = []
   description = "Defined network policy for the helm deployment"
 }
+
+variable "manifests_to_apply" {
+  type = map(object({
+    path_pattern = string
+    vars         = map(string)
+  }))
+  default     = {}
+  description = "Read inputs from path_pattern: ./charts/*.yaml to apply from yaml file"
+}
+
+variable "inline_yaml_manifest" {
+  type        = string
+  default     = ""
+  description = "Inline yaml to apply"
+}

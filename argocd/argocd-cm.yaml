@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Argo CD's externally facing base URL (optional). Required when configuring SSO
+  url: https://localhost/argocd
+
+  # Enables application status badge feature
+  statusbadge.enabled: "true"
+
+  # Enables anonymous user access. The anonymous users get default role permissions specified argocd-rbac-cm.yaml.
+  users.anonymous.enabled: "true"
+  # Specifies token expiration duration
+  users.session.duration: "24h"
+
+
+  resource.compareoptions: |
+    # if ignoreAggregatedRoles set to true then differences caused by aggregated roles in RBAC resources are ignored.
+    ignoreAggregatedRoles: true
+
+    # disables status field diffing in specified resource types
+    # 'crd' - CustomResourceDefinitions (default)
+    # 'all' - all resources
+    # 'none' - disabled
+    ignoreResourceStatusField: crd
+
+  # Configuration to add a config management plugin.
+  configManagementPlugins: |
+    - name: kasane
+      init:
+        command: [kasane, update]
+      generate:
+        command: [kasane, show]
+    - name: vela
+      init:
+        command: ["sh", "-xc"]
+        args: ["vela env init $ARGOCD_APP_NAMESPACE --namespace $ARGOCD_APP_NAMESPACE"]
+      generate:
+        command: ["sh", "-xc"]
+        args: ["vela export -e $ARGOCD_APP_NAMESPACE"]

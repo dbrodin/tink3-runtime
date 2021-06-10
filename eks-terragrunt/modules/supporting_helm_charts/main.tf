@@ -90,3 +90,23 @@ resource "kubernetes_network_policy" "main" {
   #   policy_types = ["Ingress"]
   # }
 }
+
+## Kubectl release
+data "kubectl_path_documents" "manifests" {
+  for_each = var.manifests_to_apply
+
+  # Example ../file to chart..
+  pattern = each.value["path_pattern"]
+  vars    = lookup(each.value, "vars", {})
+}
+
+resource "kubectl_manifest" "applying_file_manifest" {
+  for_each  = data.kubectl_path_documents.manifests
+  yaml_body = try(lookup(each.value, "documents", [])[0], "")
+}
+
+# Can do inline as well..
+resource "kubectl_manifest" "applying_inline_manifest" {
+  count     = var.inline_yaml_manifest != "" ? var.inline_yaml_manifest : 0
+  yaml_body = yamldecode(var.inline_yaml_manifest)
+}

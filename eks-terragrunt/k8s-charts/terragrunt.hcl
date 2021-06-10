@@ -17,7 +17,9 @@ dependency "eks-cluster" {
   config_path = "../eks-cluster"
 
   mock_outputs = {
-    cluster_id = "cluster_id"
+    cluster_id                           = "cluster_id"
+    cluster_oidc_issuer_url              = "oidc.eks.eu-west-1.amazonaws.com/id/EXAMPLE0123"
+    aws_loadbalancer_controller_role_arn = "arn:aws:iam::111122223333:role/AmazonEKSLoadBalancerControllerRole"
   }
 }
 
@@ -86,7 +88,9 @@ generate "versions" {
 }
 
 inputs = {
-  cluster_id = dependency.eks-cluster.outputs.cluster_id
+  cluster_id                           = dependency.eks-cluster.outputs.cluster_id
+  cluster_oidc_issuer_url              = dependency.eks-cluster.outputs.cluster_oidc_issuer_url
+  aws_loadbalancer_controller_role_arn = dependency.eks-cluster.outputs.aws_loadbalancer_controller_role_arn
 
   helm_release = {
     ingress-nginx = {
@@ -95,6 +99,15 @@ inputs = {
       chart_version = "3.33.0"
       namespace     = "ingress-nginx"
       deploy_config = {}
+    }
+  }
+
+  manifests_to_apply = {
+    aws_aws_loadbalancer_controller = {
+      path_pattern = "${get_parent_terragrunt_dir()}/../charts/aws-load-balancer-controller/*.yaml"
+      vars = {
+        role_arn = dependency.eks-cluster.outputs.aws_loadbalancer_controller_role_arn
+      }
     }
   }
 }

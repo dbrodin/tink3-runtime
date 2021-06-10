@@ -40,5 +40,8 @@ k8s-namespaces:
     labels:
       service: ingress-nginx
       maintainer: infrastructure
+  argocd:
+    labels:
+      maintainer: infrastructure
 
 # Charts to deploy - Currently set in the k8s-charts inputs = {}

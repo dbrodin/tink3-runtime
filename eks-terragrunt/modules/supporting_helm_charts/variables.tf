@@ -1,10 +1,11 @@
 variable "helm_release" {
   type = map(object({
     chart_name    = string
+    chart         = string
     namespace     = string
     chart_repo    = string
     chart_version = string
-    deploy_config = map(object({
+    deploy_config = list(object({
       force_helm_update           = bool
       recreate_pods_during_update = bool
       wait_for_rollout            = bool

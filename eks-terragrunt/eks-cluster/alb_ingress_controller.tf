@@ -1,3 +1,7 @@
+locals {
+  eks_oids_issuer = regex("https://(.*)", module.eks_cluster.cluster_oidc_issuer_url)[0]
+}
+
 data "aws_iam_policy_document" "aws_loadbalancer_controller_iam_policy" {
   statement {
     actions = [
@@ -168,18 +172,6 @@ data "aws_iam_policy_document" "aws_loadbalancer_controller_iam_policy" {
       "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
       "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
     ]
-
-    condition {
-      test     = "Null"
-      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
-      values   = ["true"]
-    }
-
-    condition {
-      test     = "Null"
-      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
-      values   = ["false"]
-    }
   }
 
   statement {
@@ -194,12 +186,7 @@ data "aws_iam_policy_document" "aws_loadbalancer_controller_iam_policy" {
       "elasticloadbalancing:DeleteTargetGroup"
     ]
 
-    resources = [
-      "arn:aws:elasticloadbalancing:*:*:listener/net/*/*/*",
-      "arn:aws:elasticloadbalancing:*:*:listener/app/*/*/*",
-      "arn:aws:elasticloadbalancing:*:*:listener-rule/net/*/*/*",
-      "arn:aws:elasticloadbalancing:*:*:listener-rule/app/*/*/*"
-    ]
+    resources = ["*"]
 
     condition {
       test     = "Null"
@@ -231,13 +218,13 @@ data "aws_iam_policy_document" "assume_role" {
     effect = "Allow"
     principals {
       type        = "Federated"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.id}:oidc-provider/${module.eks_cluster.cluster_oidc_issuer_url}"]
+      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.id}:oidc-provider/${local.eks_oids_issuer}"]
     }
     actions = ["sts:AssumeRoleWithWebIdentity"]
 
     condition {
       test     = "StringEquals"
-      variable = "${module.eks_cluster.cluster_oidc_issuer_url}:sub"
+      variable = "${local.eks_oids_issuer}:sub"
       values = [
         "system:serviceaccount:kube-system:aws-load-balancer-controller"
       ]

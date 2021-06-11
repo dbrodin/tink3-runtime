@@ -10,19 +10,19 @@ resource "helm_release" "main" {
   name       = lookup(each.value, "chart_name", null)
   namespace  = lookup(each.value, "namespace", null)
   repository = lookup(each.value, "chart_repo", null)
-  chart      = lookup(each.value, "chart_name", null)
+  chart      = lookup(each.value, "chart", null)
   version    = lookup(each.value, "chart_version", null)
 
   # Deploy config
-  force_update    = try(each.value["deploy_config"]["force_helm_update"], false)
-  recreate_pods   = try(each.value["deploy_config"]["recreate_pods_during_update"], false)
-  wait            = try(each.value["deploy_config"]["wait_for_rollout"], true)
-  cleanup_on_fail = try(each.value["deploy_config"]["cleanup_on_fail"], false)
+  force_update    = try(each.value["deploy_config"][0]["force_helm_update"], false)
+  recreate_pods   = try(each.value["deploy_config"][0]["recreate_pods_during_update"], false)
+  wait            = try(each.value["deploy_config"][0]["wait_for_rollout"], true)
+  cleanup_on_fail = try(each.value["deploy_config"][0]["cleanup_on_fail"], false)
 
-  skip_crds = try(each.value["deploy_config"]["skip_crds"], false)
-  verify    = try(each.value["deploy_config"]["verify"], false)
+  skip_crds = try(each.value["deploy_config"][0]["skip_crds"], false)
+  verify    = try(each.value["deploy_config"][0]["verify"], false)
 
-  values = try(each.value["deploy_config"]["values"], [])
+  values = try(each.value["deploy_config"][0]["values"], [])
 }
 
 # TODO: This could be checked and fixed with the ingress/egress etc
@@ -101,12 +101,20 @@ data "kubectl_path_documents" "manifests" {
 }
 
 resource "kubectl_manifest" "applying_file_manifest" {
-  for_each  = data.kubectl_path_documents.manifests
-  yaml_body = try(lookup(each.value, "documents", [])[0], "")
+  depends_on = [
+    helm_release.main,
+  ]
+
+  count     = length(flatten(values(data.kubectl_path_documents.manifests)[*].documents))
+  yaml_body = element(flatten(values(data.kubectl_path_documents.manifests)[*].documents), count.index)
 }
 
 # Can do inline as well..
 resource "kubectl_manifest" "applying_inline_manifest" {
+  depends_on = [
+    helm_release.main,
+  ]
+
   count     = var.inline_yaml_manifest != "" ? var.inline_yaml_manifest : 0
   yaml_body = yamldecode(var.inline_yaml_manifest)
 }

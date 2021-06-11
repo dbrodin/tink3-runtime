@@ -13,6 +13,14 @@ locals {
 }
 
 # Declare dependencies for the k8s-charts
+dependency "eks-vpc" {
+  config_path = "../eks-vpc"
+
+  mock_outputs = {
+    vpc_id = "vpc-mocking"
+  }
+}
+
 dependency "eks-cluster" {
   config_path = "../eks-cluster"
 
@@ -95,10 +103,37 @@ inputs = {
   helm_release = {
     ingress-nginx = {
       chart_name    = "ingress-nginx"
+      chart         = "ingress-nginx"
       chart_repo    = "https://kubernetes.github.io/ingress-nginx"
       chart_version = "3.33.0"
       namespace     = "ingress-nginx"
-      deploy_config = {}
+      deploy_config = []
+    },
+    aws-load-balancer-controller = {
+      chart_name    = "aws-load-balancer-controller"
+      chart         = "aws-load-balancer-controller"
+      chart_repo    = "https://aws.github.io/eks-charts"
+      chart_version = "1.2.1"
+      namespace     = "kube-system"
+      deploy_config = [{
+        force_helm_update           = false
+        recreate_pods_during_update = false
+        wait_for_rollout            = true
+        cleanup_on_fail             = false
+        skip_crds                   = false
+        verify                      = false
+        values = [
+          yamlencode({
+            clusterName = dependency.eks-cluster.outputs.cluster_id
+            serviceAccount = {
+              create = false
+              name   = "aws-load-balancer-controller"
+            }
+            vpcId  = dependency.eks-vpc.outputs.vpc_id
+            region = local.region
+          })
+        ]
+      }]
     }
   }
 

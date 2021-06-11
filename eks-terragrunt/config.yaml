@@ -21,6 +21,15 @@ vpc-config:
     Name: "vpc-eks-infra-testing"
     Maintainer: "infrastructure"
 
+eks-vpc-endpoint-service:
+  global:
+    allowed_aws_accounts_principals:
+    - "arn:aws:iam::141925323128:root" # Global production
+    nlb_arns_to_expose: []
+    tags:
+      Name: "eks-vpc-endpoint-service"
+      Maintainer: "infrastructure"
+
 # EKS config
 eks-cluster:
   cluster_name: "infra-testing-cluster-1"

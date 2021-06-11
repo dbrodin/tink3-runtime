@@ -60,8 +60,8 @@ module "eks_cluster" {
   node_groups = {
     "spot" = {
       create_launch_template = true
-      desired_capacity       = 1
-      max_capacity           = 3
+      desired_capacity       = 3
+      max_capacity           = 5
       min_capacity           = 1
       instance_types         = ["t3.small"]
       disk_size              = 16

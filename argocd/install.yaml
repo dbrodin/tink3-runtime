@@ -2467,8 +2467,14 @@ metadata:
     app.kubernetes.io/component: server
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
+  annotations:
+    #service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
   name: argocd-server
 spec:
+  # type: NodePort <-- this is if using ingress resource (Application loadbalancer)
+  type: LoadBalancer
   ports:
   - name: http
     port: 80

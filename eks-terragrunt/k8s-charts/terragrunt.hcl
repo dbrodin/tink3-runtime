@@ -134,7 +134,22 @@ inputs = {
           })
         ]
       }]
-    }
+    },
+    kubernetes-external-secrets = {
+      chart_name    = "kubernetes-external-secrets"
+      chart         = "kubernetes-external-secrets"
+      chart_repo    = "https://external-secrets.github.io/kubernetes-external-secrets/"
+      chart_version = "8.1.2"
+      namespace     = "external-secrets"
+      deploy_config = [{
+        values = [
+          yamlencode({
+            env.AWS_REGION = local.region
+            serviceAccount.annotations."eks\.amazonaws\.com/role-arn" = dependency.eks-cluster.outputs.k8s_external_secrets_role_arn
+          })
+        ]
+      }]
+    },
   }
 
   manifests_to_apply = {

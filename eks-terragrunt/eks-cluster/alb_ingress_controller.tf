@@ -1,7 +1,3 @@
-locals {
-  eks_oids_issuer = regex("https://(.*)", module.eks_cluster.cluster_oidc_issuer_url)[0]
-}
-
 data "aws_iam_policy_document" "aws_loadbalancer_controller_iam_policy" {
   statement {
     actions = [
@@ -231,8 +227,6 @@ data "aws_iam_policy_document" "assume_role" {
     }
   }
 }
-
-data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "aws_loadbalancer_controller_role" {
   name               = "AWSLoadBalancerControllerRole"

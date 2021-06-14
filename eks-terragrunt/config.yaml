@@ -52,5 +52,9 @@ k8s-namespaces:
   argocd:
     labels:
       maintainer: infrastructure
+  external-secrets:
+    labels:
+      maintainer: infrastructure
+
 
 # Charts to deploy - Currently set in the k8s-charts inputs = {}

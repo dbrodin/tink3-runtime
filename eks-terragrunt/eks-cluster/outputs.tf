@@ -10,6 +10,10 @@ output "aws_loadbalancer_controller_role_arn" {
   value = aws_iam_role.aws_loadbalancer_controller_role.arn
 }
 
+output "k8s_external_secrets_role_arn" {
+  value = aws_iam_role.k8s_external_secrets_role.arn
+}
+
 output "kubeconfig" {
   value       = module.eks_cluster.kubeconfig
   description = "Kubeconfig that can be used later with kubectl commands - if needed"

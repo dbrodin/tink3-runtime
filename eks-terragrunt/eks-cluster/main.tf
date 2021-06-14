@@ -3,6 +3,21 @@ locals {
   cluster_version = var.cluster_config["cluster_version"]
   common_tags     = var.cluster_config["tags"]
   map_roles       = var.cluster_config["map_roles"]
+  eks_oids_issuer = regex("https://(.*)", module.eks_cluster.cluster_oidc_issuer_url)[0]
+}
+
+data "aws_caller_identity" "current" {}
+
+# Add KMS key for encrypting all secrets at rest.
+resource "aws_kms_key" "eks" {
+  description         = "KMS key for EKS: ${local.cluster_name}. Used to encrypt secrets for Kubernetes cluster"
+  enable_key_rotation = true
+  tags                = local.common_tags
+}
+
+resource "aws_kms_alias" "eks_alias" {
+  name          = "alias/eks-cluster/${local.cluster_name}"
+  target_key_id = aws_kms_key.eks.key_id
 }
 
 module "eks_cluster" {
@@ -31,6 +46,17 @@ module "eks_cluster" {
     local.cluster_name
   ]
   kubeconfig_aws_authenticator_additional_args = []
+
+  # Add support for cluster encryption for secrets
+  # Current issues for how this behaves:
+  # https://github.com/hashicorp/terraform-provider-aws/issues/17952
+  # https://github.com/hashicorp/terraform-provider-kubernetes/issues/1182
+  # cluster_encryption_config = [
+  #   {
+  #     provider_key_arn = aws_kms_key.eks.arn
+  #     resources        = ["secrets"]
+  #   }
+  # ]
 
   # IAM Mappings for roles to get access:
   # Managed from the root config.yaml file

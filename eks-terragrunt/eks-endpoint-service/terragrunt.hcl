@@ -16,4 +16,5 @@ dependencies {
 
 inputs = {
   vpc_endpoint_service_config = local.vpc_endpoint_service_config
+  acceptance_required         = false
 }

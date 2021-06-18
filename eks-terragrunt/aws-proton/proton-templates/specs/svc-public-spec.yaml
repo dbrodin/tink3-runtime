@@ -1,0 +1,11 @@
+proton: ServiceSpec
+pipeline:
+  unit_test_command: "./gradlew test"
+instances:
+  - name: "arneanka"
+    environment: "infra-testing-proton-2"
+    spec:
+      desired_count: 1
+      port: 8080
+      task_size: "small"
+      service_discovery_name: "arneanka"

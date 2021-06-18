@@ -1,0 +1,129 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS ECS Fargate cluster running containers in public and private subnets. Supports
+             public facing microservices behind load balancer, private microservices, and private service discovery namespaces. Deployed resources are all tagged with defined environment name tag.
+Mappings:
+  # The VPC and subnet configuration is passed in via the environment spec.
+  EnvironmentNameConfig:
+    Environment:
+      Name: '{{ environment.name }}'
+  ServiceDiscoveryConfig:
+    PrivateNamespace:
+      Name: '{{ environment.inputs.service_discovery_namespace }}'
+
+Resources:
+  # Create a Private namespace for Service Discovery
+  PrivateNamespace:
+    Type: AWS::ServiceDiscovery::PrivateDnsNamespace
+    Properties:
+      Name: !FindInMap ['ServiceDiscoveryConfig', 'PrivateNamespace', 'Name']
+      Vpc: '{{ environment.inputs.vpc_id}}'
+
+  # Create the ECS Cluster to schedule and orchestrate the Fargate containers
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !FindInMap ['EnvironmentNameConfig', 'Environment', 'Name']
+
+  # A security group for the containers we will run in Fargate.
+  # Rules are added to this security group based on what ingress you
+  # add for the cluster.
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Access to the Fargate containers
+      VpcId: '{{ environment.inputs.vpc_id}}'
+      Tags:
+        - Key: Name
+          Value: !FindInMap ['EnvironmentNameConfig', 'Environment', 'Name']
+
+  # This is a role which is used by the ECS tasks themselves.
+  ECSTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: [ecs-tasks.amazonaws.com]
+          Action: ['sts:AssumeRole']
+      Path: /
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+      Tags:
+        - Key: Name
+          Value: !FindInMap ['EnvironmentNameConfig', 'Environment', 'Name']
+
+  # TODO: See if we can use one bucket for all artifacts
+  # PipelineArtifactsBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     BucketName: "{{ environment.inputs.artifacts_bucketname }}"
+  #     BucketEncryption:
+  #       ServerSideEncryptionConfiguration:
+  #         - ServerSideEncryptionByDefault:
+  #             KMSMasterKeyID:
+  #               Fn::GetAtt:
+  #                 - PipelineArtifactsBucketEncryptionKey
+  #                 - Arn
+  #             SSEAlgorithm: aws:kms
+  #     PublicAccessBlockConfiguration:
+  #       BlockPublicAcls: true
+  #       BlockPublicPolicy: true
+  #       IgnorePublicAcls: true
+  #       RestrictPublicBuckets: true
+  #   UpdateReplacePolicy: Retain
+  #   DeletionPolicy: Retain
+  # PipelineArtifactsBucketEncryptionKeyAlias:
+  #   Type: AWS::KMS::Alias
+  #   Properties:
+  #     AliasName: 'alias/codepipeline-encryption-key-{{ environment.name }}'
+  #     TargetKeyId:
+  #       Fn::GetAtt:
+  #         - PipelineArtifactsBucketEncryptionKey
+  #         - Arn
+  #   UpdateReplacePolicy: Delete
+  #   DeletionPolicy: Delete
+
+# These output values will be available to service templates to use.
+Outputs:
+  ClusterName:
+    Description: The name of the ECS cluster
+    Value: !Ref 'ECSCluster'
+  ECSTaskExecutionRole:
+    Description: The ARN of the ECS role
+    Value: !GetAtt 'ECSTaskExecutionRole.Arn'
+  VpcId:
+    Description: The ID of the VPC that this stack is deployed in
+    Value: '{{ environment.inputs.vpc_id}}'
+  PublicSubnetOne:
+    Description: A reference to the public subnet in the 1st Availability Zone
+    Value: '{{ environment.inputs.public_subnet_one_id}}'
+  PublicSubnetTwo:
+    Description: A reference to the public subnet in the 2nd Availability Zone
+    Value: '{{ environment.inputs.public_subnet_two_id}}'
+  PublicSubnetThree:
+    Description: A reference to the public subnet in the 3nd Availability Zone
+    Value: '{{ environment.inputs.public_subnet_three_id}}'
+  PrivateSubnetOne:
+    Description: A reference to the private subnet in the 1st Availability Zone
+    Value: '{{ environment.inputs.private_subnet_one_id}}'
+  PrivateSubnetTwo:
+    Description: A reference to the private subnet in the 2nd Availability Zone
+    Value: '{{ environment.inputs.private_subnet_two_id}}'
+  PrivateSubnetThree:
+    Description: A reference to the private subnet in the 3nd Availability Zone
+    Value: '{{ environment.inputs.private_subnet_three_id}}'
+  ContainerSecurityGroup:
+    Description: A security group used to allow Fargate containers to receive traffic
+    Value: !Ref 'ContainerSecurityGroup'
+  PrivateNamespace:
+    Description: The NamespaceId registered for Service Discovery
+    Value: !Ref 'PrivateNamespace'
+  # PipelineArtifactsBucket:
+  #   Description: Shared bucket for pipeline artifacts
+  #   Value: !Ref 'PipelineArtifactsBucket'
+  # PipelineArtifactsBucketEncryptionKeyAlias:
+  #   Description: Shared KMS key for pipeline artifacts
+  #   Value: !Ref 'PipelineArtifactsBucketEncryptionKeyAlias'

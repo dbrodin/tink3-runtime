@@ -1,0 +1,11 @@
+proton: ServiceSpec
+pipeline:
+  unit_test_command: "echo 'This is a really good test!'"
+instances:
+  - name: "backend-dev"
+    environment: "infra-testing-proton-2"
+    spec:
+      desired_count: 2
+      port: 80
+      task_size: "medium"
+      service_discovery_name: "backend-dev"

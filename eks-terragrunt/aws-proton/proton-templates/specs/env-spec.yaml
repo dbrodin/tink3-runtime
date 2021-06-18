@@ -1,0 +1,12 @@
+proton: EnvironmentSpec
+# Reuse from already existing Infra
+# TODO: Could make all the infra and instead import it with the "import existing" environment templates function
+spec:
+  vpc_id: "vpc-0171f9e9529d650bb"
+  public_subnet_one_id: subnet-07ffa530d49073ddc
+  public_subnet_two_id: subnet-09222ef1f45b5a404
+  public_subnet_three_id: subnet-0855fe66e2eb1b35f
+  private_subnet_one_id: subnet-03f324d40ac613ef9
+  private_subnet_two_id: subnet-09e00277225102e84
+  private_subnet_three_id: subnet-0aa2dfc6572076012
+  service_discovery_namespace: "example.local"

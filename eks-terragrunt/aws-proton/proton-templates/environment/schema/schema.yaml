@@ -1,0 +1,45 @@
+schema:
+  format:
+    openapi: "3.0.0"
+  environment_input_type: "PublicEnvironmentInput"
+  types:
+    PublicEnvironmentInput:
+      type: object
+      description: "Input properties for infra-testing environment"
+      properties:
+        vpc_id:
+          type: string
+          description: "The VPC ID to deploy to"
+          default: vpc-0171f9e9529d650bb
+        public_subnet_one_id:
+          type: string
+          description: "The public subnet one"
+          default: subnet-07ffa530d49073ddc
+        public_subnet_two_id:
+          type: string
+          description: "The public subnet two"
+          default: subnet-09222ef1f45b5a404
+        public_subnet_three_id:
+          type: string
+          description: "The public subnet three"
+          default: subnet-0855fe66e2eb1b35f
+        private_subnet_one_id:
+          type: string
+          description: "The private subnet one"
+          default: subnet-03f324d40ac613ef9
+        private_subnet_two_id:
+          type: string
+          description: "The private subnet two"
+          default: subnet-09e00277225102e84
+        private_subnet_three_id:
+          type: string
+          description: "The private subnet three"
+          default: subnet-0aa2dfc6572076012
+        service_discovery_namespace:
+          type: string
+          description: "The name of the private namespace for service discovery"
+          default: example.local
+        artifacts_bucketname:
+          type: sting
+          description: "The location of the Dockerfile to build"
+          default: "tink3-sandbox-infra-testing-proton-pipelineartifacts"

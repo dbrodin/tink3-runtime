@@ -6,3 +6,7 @@ terraform.tfstate.backup
 errored.tfstate
 plan
 .terragrunt-cache/
+
+# common
+*.tar
+*.tar.gz

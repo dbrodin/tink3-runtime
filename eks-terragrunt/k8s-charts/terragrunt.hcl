@@ -143,7 +143,7 @@ inputs = {
       namespace     = "external-secrets"
       deploy_config = [{
         force_helm_update           = false
-        recreate_pods_during_update = false
+        recreate_pods_during_update = true
         wait_for_rollout            = true
         cleanup_on_fail             = false
         skip_crds                   = false
@@ -151,7 +151,12 @@ inputs = {
         values = [
           yamlencode({
             env = {
-              AWS_REGION = local.region
+              AWS_REGION                = local.region
+              AWS_DEFAULT_REGION        = local.region
+              AWS_INTERMEDIATE_ROLE_ARN = dependency.eks-cluster.outputs.k8s_external_secrets_role_arn
+            }
+            securityContext = {
+              fsGroup = 65534
             }
             serviceAccount = {
               annotations = {

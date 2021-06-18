@@ -83,6 +83,14 @@ data "aws_iam_policy_document" "k8s_external_secrets_sassume_role" {
         "system:serviceaccount:external-secrets:external-secrets-kubernetes-external-secrets"
       ]
     }
+
+    condition {
+      test     = "StringEquals"
+      variable = "${local.eks_oids_issuer}:aud"
+      values = [
+        "sts.amazonaws.com"
+      ]
+    }
   }
 }
 

@@ -25,7 +25,9 @@ eks-vpc-endpoint-service:
   global:
     allowed_aws_accounts_principals:
     - "arn:aws:iam::141925323128:root" # Global production
-    nlb_arns_to_expose: []
+    nlb_arns_to_expose:
+    # argocd-server service
+    - "arn:aws:elasticloadbalancing:eu-west-1:649414960431:loadbalancer/net/k8s-argocd-argocdse-30b434192d/a532369bd2abee64"
     tags:
       Name: "eks-vpc-endpoint-service"
       Maintainer: "infrastructure"

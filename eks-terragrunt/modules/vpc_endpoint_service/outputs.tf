@@ -1,11 +1,11 @@
-output "vpc_endpoint_service_id" {
-  value = try(aws_vpc_endpoint_service.vpc_endpoint_service[*].id, "")
-}
-
-output "vpc_endpoint_service_base_endpoint_dns_names" {
-  value = try(aws_vpc_endpoint_service.vpc_endpoint_service[*].base_endpoint_dns_names, "")
-}
-
-output "vpc_endpoint_service_private_dns_name" {
-  value = try(aws_vpc_endpoint_service.vpc_endpoint_service[*].private_dns_name, "")
+output "vpc_endpoint_service" {
+  value = {
+    for endpoint, values in aws_vpc_endpoint_service.vpc_endpoint_service :
+    endpoint => {
+      id               = values.id
+      base_dns_names   = values.base_endpoint_dns_names
+      private_dns_name = values.private_dns_name
+      service_name     = values.service_name
+    }
+  }
 }
